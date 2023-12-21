@@ -1,0 +1,6 @@
+{Kuřecí řízek obalovaný/	150/	20/	kuřecí-rizek.jpg};	2;	15;	2019-05-25T14:15
+{Hranolky/	80/	15/	hranolky.jpg};	2;	15;	2019-05-25T15:20
+{Kofola/	40/	5/	kofola.jpg};	2;	15;	2019-05-25T16:40
+{Pstruh na víně/	220/	30/	pstruh.jpg};	1;	2;	2020-04-07T02:52
+{Kofola/	40/	5/	kofola.jpg};	69;	69;	2023-12-21T05:47
+{Kuřecí řízek obalovaný/	150/	20/	kuřecí-rizek.jpg};	69;	69;	2023-12-21T06:09
