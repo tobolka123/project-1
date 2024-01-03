@@ -1,4 +1,4 @@
-public class RestException extends Throwable {
+public class RestException extends Exception {
     public RestException(Exception e) {
         super(e.getLocalizedMessage());
     }

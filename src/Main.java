@@ -19,6 +19,7 @@ public class Main {
         Order order2 = new Order(dish2, 2, 15, LocalDateTime.of(2019, 5, 25, 15, 20));
         Order order3 = new Order(dish4, 2, 15, LocalDateTime.of(2019, 5, 25, 16, 40));
         Order order4 = new Order(dish3, 1, 2, LocalDateTime.of(2020, 4, 7, 2, 52));
+        Order order5 = new Order(dish3, 1, 2, LocalDateTime.of(2023, 12, 31, 8, 48));
 
         order1.setPaid();
         order3.setPaid();
@@ -28,6 +29,7 @@ public class Main {
         manager.addOrder(order2);
         manager.addOrder(order3);
         manager.addOrder(order4);
+        manager.addOrder(order5);
 
         System.out.println("nedodelane objednavky: " + manager.getNotdoneOrdersCount());
         System.out.println("Objednavky srovnane podle casu: " + manager.getOrdersSortedByTime());
@@ -39,7 +41,7 @@ public class Main {
         double totalBillForTable15 = manager.calculateTotalBillForTable(15);
         System.out.println("celkova cena pro stul 15: " + totalBillForTable15);
 
-        String ordersForTable15 = manager.exportOrdersForTable(15);
+        String ordersForTable15 = manager.exportOrdersForTable(2);
         System.out.println(ordersForTable15);
 
         System.out.println("dnes objednanych jidel: " + manager.getDailyOrderedDishes());

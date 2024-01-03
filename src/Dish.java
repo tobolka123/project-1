@@ -5,13 +5,19 @@ public class Dish {
     private BigDecimal price;
     private int preparationTime;
     private String imageUrl;
-    private String reg = "/";
+    private static final String reg = "/";
 
     public Dish(String title, BigDecimal price, int preparationTime, String imageUrl) throws RestException {
         setTitle(title);
         setPrice(price);
         setPreparationTime(preparationTime);
         setImageUrl(imageUrl);
+    }
+    public Dish(String title, BigDecimal price, int preparationTime) throws RestException {
+        setTitle(title);
+        setPrice(price);
+        setPreparationTime(preparationTime);
+        setImageUrl("blanc");
     }
 
     public String getTitle() {
@@ -61,6 +67,9 @@ public class Dish {
     @Override
     public String toString() {
         return "{" + title + reg+'\t'  + price + reg +"\t" + preparationTime + reg +"\t" + imageUrl+ "}";
+    }
+    public static String getReg() {
+        return reg;
     }
 
 }

@@ -9,7 +9,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class RestourantManager {
-    private List<Dish> menu;
+    private static List<Dish> menu;
     private static List<Order> orders;
     private static final String regex = ";";
 
@@ -78,9 +78,13 @@ public class RestourantManager {
 
     public String exportOrdersForTable(int tableNumber) {
         StringBuilder output = new StringBuilder();
+        Set<Order> orderSet = new HashSet<>();
         output.append("** Objednávky pro stůl č. ").append(String.format("%02d", tableNumber)).append(" **\n****\n");
         int i = 0;
-        for (Order order : orders) {
+        for (Order ordSetAdd : orders) {
+            orderSet.add(ordSetAdd);
+        }
+        for (Order order : orderSet) {
             if (order != null) {
                 if (order.getDish() != null && order.getDish().getImageUrl() != null  && order.getTableNumber() == tableNumber) {
                     i++;
@@ -159,7 +163,7 @@ public class RestourantManager {
         try {
             String block = blocks[0].replace("{", "");
             block = block.replace("}", "");
-            String[] blocksDish = block.split("/");
+            String[] blocksDish = block.split(Dish.getReg());
             int numOfBlocksDish = blocksDish.length;
             if (numOfBlocksDish != 4) {
                 throw new RestException(
