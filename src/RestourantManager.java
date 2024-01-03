@@ -28,14 +28,12 @@ public class RestourantManager {
         return count;
     }
 
-    public List<String> getOrdersSortedByTime() {
+    public List<Order> getOrdersSortedByTime() {
         List<Order> sortedOrders = new ArrayList<>(orders);
-        List<String> finalStr = new ArrayList<>();
+        List<Order> finalOrd = new ArrayList<>();
         Collections.sort(sortedOrders, Comparator.comparing(Order::getOrderedTime));
-        for (Order ord:sortedOrders) {
-            finalStr.add(ord.getDish().getTitle());
-        }
-        return finalStr;
+        finalOrd.addAll(sortedOrders);
+        return finalOrd;
     }
 
     public double getAverageOrderTime() {
@@ -97,16 +95,17 @@ public class RestourantManager {
 
         return output.toString();
     }
-
-    public void addDish(Dish dish) {
-        menu.add(dish);
+    public static void addDish(Dish dish) {
+        if (!menu.contains(dish)) {
+            menu.add(dish);
+        }
     }
 
-    public void removeDish(String dishTitle) {
-        menu.removeIf(d -> d.getTitle().equals(dishTitle));
+    public void removeDish(Dish dish) {
+        menu.remove(dish);
     }
 
-    public void addOrder(Order order) {
+    public static void addOrder(Order order) {
         orders.add(order);
     }
 
@@ -126,6 +125,7 @@ public class RestourantManager {
 
     public static List<Order> loadFromFile(String filename) throws RestException {
         try (Scanner scanner = new Scanner(new BufferedReader(new FileReader(filename)))) {
+            orders = new ArrayList<>();
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
                 if (!Objects.equals(line, "null"))
@@ -193,6 +193,7 @@ public class RestourantManager {
             }
             url = blocksDish[3].trim();
             dish = new Dish(title, price, preptime, url);
+            addDish(dish);
 
         } catch (NumberFormatException e) {
             throw new RestException("chybne zadane jidlo" + blocks[0]);
@@ -240,6 +241,19 @@ public class RestourantManager {
             }
         }
         return output;
+    }
+
+    public static List<Dish> getMenu() {
+        return menu;
+    }
+    public static String getPrettyMenu() {
+        String prettymenu = "";
+        for (Dish dish:menu) {
+            if (dish != null) {
+                prettymenu += dish.getTitle() + ", ";
+            }
+        }
+        return prettymenu;
     }
 
     public static String formatTime(LocalDateTime date) {
