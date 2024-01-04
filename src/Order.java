@@ -1,3 +1,4 @@
+import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -20,7 +21,12 @@ public class Order {
         this.dish = dish;
         this.quantity = quantity;
         this.tableNumber = tableNumber;
-        this.orderedTime = orderedTime;
+        try {
+            this.orderedTime = orderedTime;
+        } catch (DateTimeException e){
+            System.err.println("spatne zadane datum" + orderedTime);
+            orderedTime = LocalDateTime.now();
+        }
         this.fulfilmentTime = orderedTime.plusMinutes(dish.getPreparationTime());
         this.isPaid = false;
     }

@@ -24,6 +24,8 @@ public class Main {
         order1.setPaid();
         order3.setPaid();
 
+        RestourantManager.loadFromFile("invalid_data.txt");
+
 
         manager.addOrder(order1);
         manager.addOrder(order2);
@@ -47,7 +49,5 @@ public class Main {
         System.out.println("dnes objednanych jidel: " + manager.getDailyOrderedDishes());
 
         System.out.println(RestourantManager.getPrettyMenu());
-
-        RestourantManager.loadFromFile("invalid_data.txt");
     }
 }

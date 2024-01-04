@@ -3,9 +3,11 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
 public class RestourantManager {
@@ -130,7 +132,9 @@ public class RestourantManager {
                     orders.add(parseOrder((line)));
             }
         } catch (FileNotFoundException e) {
-            throw new RestException("Nepodařilo se nalézt soubor " + filename + ": " + e.getLocalizedMessage());
+            orders.clear();
+            menu.clear();
+            System.err.println("Nepodařilo se nalézt soubor " + filename + ": " + e.getLocalizedMessage());
         }
         return orders;
     }
@@ -153,7 +157,7 @@ public class RestourantManager {
             return null;
         }
         if (numOfBlocks != 4) {
-            throw new RestException(
+            System.err.println(
                     "Nesprávný počet položek na řádku: " + line +
                             "! Počet položek: " + numOfBlocks + ".");
         }
@@ -209,7 +213,7 @@ public class RestourantManager {
         try {
             table = Integer.parseInt(blocks[2].trim());
             if (table < 0){
-                throw new RestException("Chybne zadane cislo" + blocks[2]);
+                throw new RestException("zadane cislo nesmi byt mensi nez nula" + blocks[2]);
             }
         } catch (NumberFormatException e) {
             throw new RestException("Chybne zadane cislo" + blocks[2]);
@@ -217,8 +221,9 @@ public class RestourantManager {
         LocalDateTime orderTime;
         try {
             orderTime = LocalDateTime.parse(blocks[3].trim());
-        } catch (NumberFormatException e) {
-            throw new RestException("Chybne zadane datum" + blocks[3]);
+        } catch (DateTimeParseException e) {
+            orderTime = LocalDateTime.now();
+            System.err.println("Chybne zadane datum" + blocks[3]);
         }
         return new Order(dish, quantity, table, orderTime);
     }
