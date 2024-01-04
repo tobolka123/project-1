@@ -3,13 +3,15 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
 public class RestourantManager {
-    private List<Dish> menu;
+    private static List<Dish> menu;
     private static List<Order> orders;
     private static final String regex = ";";
 
@@ -28,14 +30,12 @@ public class RestourantManager {
         return count;
     }
 
-    public List<String> getOrdersSortedByTime() {
+    public List<Order> getOrdersSortedByTime() {
         List<Order> sortedOrders = new ArrayList<>(orders);
-        List<String> finalStr = new ArrayList<>();
+        List<Order> finalOrd = new ArrayList<>();
         Collections.sort(sortedOrders, Comparator.comparing(Order::getOrderedTime));
-        for (Order ord:sortedOrders) {
-            finalStr.add(ord.getDish().getTitle());
-        }
-        return finalStr;
+        finalOrd.addAll(sortedOrders);
+        return finalOrd;
     }
 
     public double getAverageOrderTime() {
@@ -57,16 +57,14 @@ public class RestourantManager {
     }
 
 
-    public List<Dish> getDailyOrderedDishes() {
-        List<Dish> dailyOrderedDishes = new ArrayList<>();
-        List<String> dailyOrderedDishesTitle = new ArrayList<>();
-        LocalDateTime today = LocalDateTime.now();
-
+    public Set<Dish> getDailyOrderedDishes() {
+        Set<Dish> dailyOrderedDishes = new HashSet<>();
+        LocalDate now = LocalDate.now();
+        LocalDateTime today = LocalDateTime.of(now.getYear(), now.getMonthValue(), now.getDayOfMonth(), 0, 0);
         for (Order order : orders) {
             if (order != null) {
-                String orderedTime = formatTime2(order.getOrderedTime());
-                String today2 = formatTime2(today);
-                if (orderedTime.equals(today2)) {
+                LocalDateTime orderedTime = order.getOrderedTime();
+                if (orderedTime.isAfter(today)) {
                     dailyOrderedDishes.add(order.getDish());
                     }
                 }
@@ -78,9 +76,13 @@ public class RestourantManager {
 
     public String exportOrdersForTable(int tableNumber) {
         StringBuilder output = new StringBuilder();
+        Set<Order> orderSet = new HashSet<>();
         output.append("** Objednávky pro stůl č. ").append(String.format("%02d", tableNumber)).append(" **\n****\n");
         int i = 0;
-        for (Order order : orders) {
+        for (Order ordSetAdd : orders) {
+            orderSet.add(ordSetAdd);
+        }
+        for (Order order : orderSet) {
             if (order != null) {
                 if (order.getDish() != null && order.getDish().getImageUrl() != null  && order.getTableNumber() == tableNumber) {
                     i++;
@@ -93,16 +95,17 @@ public class RestourantManager {
 
         return output.toString();
     }
-
-    public void addDish(Dish dish) {
-        menu.add(dish);
+    public static void addDish(Dish dish) {
+        if (!menu.contains(dish)) {
+            menu.add(dish);
+        }
     }
 
-    public void removeDish(String dishTitle) {
-        menu.removeIf(d -> d.getTitle().equals(dishTitle));
+    public void removeDish(Dish dish) {
+        menu.remove(dish);
     }
 
-    public void addOrder(Order order) {
+    public static void addOrder(Order order) {
         orders.add(order);
     }
 
@@ -122,13 +125,16 @@ public class RestourantManager {
 
     public static List<Order> loadFromFile(String filename) throws RestException {
         try (Scanner scanner = new Scanner(new BufferedReader(new FileReader(filename)))) {
+            orders = new ArrayList<>();
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
                 if (!Objects.equals(line, "null"))
                     orders.add(parseOrder((line)));
             }
         } catch (FileNotFoundException e) {
-            throw new RestException("Nepodařilo se nalézt soubor " + filename + ": " + e.getLocalizedMessage());
+            orders.clear();
+            menu.clear();
+            System.err.println("Nepodařilo se nalézt soubor " + filename + ": " + e.getLocalizedMessage());
         }
         return orders;
     }
@@ -151,7 +157,7 @@ public class RestourantManager {
             return null;
         }
         if (numOfBlocks != 4) {
-            throw new RestException(
+            System.err.println(
                     "Nesprávný počet položek na řádku: " + line +
                             "! Počet položek: " + numOfBlocks + ".");
         }
@@ -159,7 +165,7 @@ public class RestourantManager {
         try {
             String block = blocks[0].replace("{", "");
             block = block.replace("}", "");
-            String[] blocksDish = block.split("/");
+            String[] blocksDish = block.split(Dish.getReg());
             int numOfBlocksDish = blocksDish.length;
             if (numOfBlocksDish != 4) {
                 throw new RestException(
@@ -189,6 +195,7 @@ public class RestourantManager {
             }
             url = blocksDish[3].trim();
             dish = new Dish(title, price, preptime, url);
+            addDish(dish);
 
         } catch (NumberFormatException e) {
             throw new RestException("chybne zadane jidlo" + blocks[0]);
@@ -206,7 +213,7 @@ public class RestourantManager {
         try {
             table = Integer.parseInt(blocks[2].trim());
             if (table < 0){
-                throw new RestException("Chybne zadane cislo" + blocks[2]);
+                throw new RestException("zadane cislo nesmi byt mensi nez nula" + blocks[2]);
             }
         } catch (NumberFormatException e) {
             throw new RestException("Chybne zadane cislo" + blocks[2]);
@@ -214,8 +221,9 @@ public class RestourantManager {
         LocalDateTime orderTime;
         try {
             orderTime = LocalDateTime.parse(blocks[3].trim());
-        } catch (NumberFormatException e) {
-            throw new RestException("Chybne zadane datum" + blocks[3]);
+        } catch (DateTimeParseException e) {
+            orderTime = LocalDateTime.now();
+            System.err.println("Chybne zadane datum" + blocks[3]);
         }
         return new Order(dish, quantity, table, orderTime);
     }
@@ -236,6 +244,19 @@ public class RestourantManager {
             }
         }
         return output;
+    }
+
+    public static List<Dish> getMenu() {
+        return menu;
+    }
+    public static String getPrettyMenu() {
+        String prettymenu = "";
+        for (Dish dish:menu) {
+            if (dish != null) {
+                prettymenu += dish.getTitle() + ", ";
+            }
+        }
+        return prettymenu;
     }
 
     public static String formatTime(LocalDateTime date) {

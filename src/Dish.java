@@ -1,17 +1,24 @@
 import java.math.BigDecimal;
+import java.util.Objects;
 
 public class Dish {
     private String title;
     private BigDecimal price;
     private int preparationTime;
     private String imageUrl;
-    private String reg = "/";
+    private static final String reg = "/";
 
     public Dish(String title, BigDecimal price, int preparationTime, String imageUrl) throws RestException {
         setTitle(title);
         setPrice(price);
         setPreparationTime(preparationTime);
         setImageUrl(imageUrl);
+    }
+    public Dish(String title, BigDecimal price, int preparationTime) throws RestException {
+        setTitle(title);
+        setPrice(price);
+        setPreparationTime(preparationTime);
+        setImageUrl("blank");
     }
 
     public String getTitle() {
@@ -61,6 +68,26 @@ public class Dish {
     @Override
     public String toString() {
         return "{" + title + reg+'\t'  + price + reg +"\t" + preparationTime + reg +"\t" + imageUrl+ "}";
+    }
+    public static String getReg() {
+        return reg;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+
+        Dish otherDish = (Dish) obj;
+        return this.title.equals(otherDish.title) &&
+                Objects.equals(this.price, otherDish.price) &&
+                this.preparationTime == otherDish.preparationTime &&
+                this.imageUrl.equals(otherDish.imageUrl);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(title, price, preparationTime, imageUrl);
     }
 
 }
