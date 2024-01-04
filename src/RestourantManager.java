@@ -55,16 +55,14 @@ public class RestourantManager {
     }
 
 
-    public List<Dish> getDailyOrderedDishes() {
-        List<Dish> dailyOrderedDishes = new ArrayList<>();
-        List<String> dailyOrderedDishesTitle = new ArrayList<>();
-        LocalDateTime today = LocalDateTime.now();
-
+    public Set<Dish> getDailyOrderedDishes() {
+        Set<Dish> dailyOrderedDishes = new HashSet<>();
+        LocalDate now = LocalDate.now();
+        LocalDateTime today = LocalDateTime.of(now.getYear(), now.getMonthValue(), now.getDayOfMonth(), 0, 0);
         for (Order order : orders) {
             if (order != null) {
-                String orderedTime = formatTime2(order.getOrderedTime());
-                String today2 = formatTime2(today);
-                if (orderedTime.equals(today2)) {
+                LocalDateTime orderedTime = order.getOrderedTime();
+                if (orderedTime.isAfter(today)) {
                     dailyOrderedDishes.add(order.getDish());
                     }
                 }
