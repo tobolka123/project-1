@@ -1,9 +1,5 @@
 import java.io.*;
 import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -11,9 +7,9 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 
 public class RestourantManager {
-    private static List<Dish> menu;
-    private static List<Order> orders;
-    private static final String regex = ";";
+    private List<Dish> menu;
+    private List<Order> orders;
+    private static final String delimiter = ";";
 
     public RestourantManager() {
         this.menu = new ArrayList<>();
@@ -95,7 +91,7 @@ public class RestourantManager {
 
         return output.toString();
     }
-    public static void addDish(Dish dish) {
+    public void addDish(Dish dish) {
         if (!menu.contains(dish)) {
             menu.add(dish);
         }
@@ -105,7 +101,7 @@ public class RestourantManager {
         menu.remove(dish);
     }
 
-    public static void addOrder(Order order) {
+    public void addOrder(Order order) {
         orders.add(order);
     }
 
@@ -123,7 +119,7 @@ public class RestourantManager {
         return totalBill;
     }
 
-    public static List<Order> loadFromFile(String filename) throws RestException {
+    public List<Order> loadFromFile(String filename) throws RestException {
         try (Scanner scanner = new Scanner(new BufferedReader(new FileReader(filename)))) {
             orders = new ArrayList<>();
             while (scanner.hasNextLine()) {
@@ -138,7 +134,7 @@ public class RestourantManager {
         }
         return orders;
     }
-    public static void loadToFile(String fileName) throws RestException {
+    public void loadToFile(String fileName) throws RestException {
         try (PrintWriter outputWriter = new PrintWriter(new BufferedWriter(new FileWriter(fileName)))) {{
             for (Order ord : orders)
                 if (ord != null) {
@@ -150,8 +146,8 @@ public class RestourantManager {
         }
     }
 
-    private static Order parseOrder(String line) throws RestException {
-        String[] blocks = line.split(regex);
+    private Order parseOrder(String line) throws RestException {
+        String[] blocks = line.split(delimiter);
         int numOfBlocks = blocks.length;
         if (line.isEmpty()) {
             return null;
@@ -222,14 +218,13 @@ public class RestourantManager {
         try {
             orderTime = LocalDateTime.parse(blocks[3].trim());
         } catch (DateTimeParseException e) {
-            orderTime = LocalDateTime.now();
-            System.err.println("Chybne zadane datum" + blocks[3]);
+            throw new RestException("chybne zadane datum: " + blocks[3]);
         }
         return new Order(dish, quantity, table, orderTime);
     }
 
-    public static String getRegex() {
-        return regex;
+    public String getRegex() {
+        return delimiter;
     }
 
     @Override
@@ -246,10 +241,10 @@ public class RestourantManager {
         return output;
     }
 
-    public static List<Dish> getMenu() {
+    public List<Dish> getMenu() {
         return menu;
     }
-    public static String getPrettyMenu() {
+    public String getPrettyMenu() {
         String prettymenu = "";
         for (Dish dish:menu) {
             if (dish != null) {
@@ -259,10 +254,10 @@ public class RestourantManager {
         return prettymenu;
     }
 
-    public static String formatTime(LocalDateTime date) {
+    public String formatTime(LocalDateTime date) {
         return date.format(DateTimeFormatter.ofPattern("HH:mm"));
     }
-    public static String formatTime2(LocalDateTime date) {
+    public String formatTime2(LocalDateTime date) {
         return date.format(DateTimeFormatter.ofPattern("yy:MM:dd"));
     }
 

@@ -14,17 +14,16 @@ public class Main {
         manager.addDish(dish2);
         manager.addDish(dish3);
         manager.addDish(dish4);
+        manager.loadFromFile("invalid_data.txt");
 
         Order order1 = new Order(dish1, 2, 15, LocalDateTime.of(2019, 5, 25, 14, 15));
         Order order2 = new Order(dish2, 2, 15, LocalDateTime.of(2019, 5, 25, 15, 20));
         Order order3 = new Order(dish4, 2, 15, LocalDateTime.of(2019, 5, 25, 16, 40));
         Order order4 = new Order(dish3, 1, 2, LocalDateTime.of(2020, 4, 7, 2, 52));
-        Order order5 = new Order(dish3, 1, 2, LocalDateTime.of(2024, 1, 4, 8, 48));
+        Order order5 = new Order(dish4, 1, 2, LocalDateTime.of(2024, 1, 4, 8, 48));
 
         order1.setPaid();
         order3.setPaid();
-
-        RestourantManager.loadFromFile("invalid_data.txt");
 
 
         manager.addOrder(order1);
@@ -37,8 +36,8 @@ public class Main {
         System.out.println("Objednavky srovnane podle casu: " + manager.getOrdersSortedByTime());
         System.out.println("prumnerny cas na objednavce: " + manager.getAverageOrderTime());
 
-        RestourantManager.loadToFile("data.txt");
-        System.out.println(RestourantManager.loadFromFile("data2.txt"));
+        manager.loadToFile("data.txt");
+        //System.out.println(manager.loadFromFile("data2.txt"));
 
         double totalBillForTable15 = manager.calculateTotalBillForTable(15);
         System.out.println("celkova cena pro stul 15: " + totalBillForTable15);
@@ -48,6 +47,19 @@ public class Main {
 
         System.out.println("dnes objednanych jidel: " + manager.getDailyOrderedDishes());
 
-        System.out.println(RestourantManager.getPrettyMenu());
+        System.out.println(manager.getPrettyMenu());
+
+        System.out.println("\n");
+        try {
+            manager.loadFromFile("data.txt");
+        } catch (RestException e) {
+            System.err.println("chybne zadana data");
+        }
+        System.out.println(manager.exportOrdersForTable(2));
+        try {
+            manager.loadFromFile("data1.txt");
+        } catch (RestException e) {
+            System.err.println("chybne zadana data");
+        }
     }
 }
